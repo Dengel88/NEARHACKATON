@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI-Shtat Pay</title>
+<meta name="description" content="An AI sales assistant that issues invoices in chat and takes payment in any token on any chain via NEAR Intents. The merchant receives USDC on NEAR.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f6f7f9;--panel:#fff;--ink:#14161a;--muted:#5d6470;--line:#e3e6eb;
+  --accent:#00c08b;--accent-ink:#04261c;--user:#14161a;--user-ink:#fff;--bot:#eef1f4;
+  --warn:#b7791f;--bad:#c53030;--ok:#0f9d6b;--radius:14px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1013;--panel:#16191e;--ink:#e9ecf1;--muted:#98a0ad;--line:#262b33;
+  --bot:#1f242b;--user:#e9ecf1;--user-ink:#0e1013;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 440px;gap:32px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}}
+h1{font-size:34px;line-height:1.15;margin:8px 0 12px;letter-spacing:-.02em}
+.tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);}
+.lead{color:var(--muted);font-size:17px;max-width:52ch}
+.steps{list-style:none;padding:0;margin:24px 0;display:grid;gap:12px}
+.steps li{display:flex;gap:12px;align-items:flex-start}
+.steps b{flex:0 0 28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:13px}
+.try{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font:inherit;font-size:13px}
+.chip:hover{border-color:var(--accent)}
+.meta{color:var(--muted);font-size:13px;margin-top:24px}
+.meta code{font-size:12px}
+.chat{background:var(--panel);border:1px solid var(--line);border-radius:20px;display:flex;flex-direction:column;height:min(760px,calc(100vh - 48px));min-height:520px;overflow:hidden;position:sticky;top:24px}
+.chat header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700}
+.chat header small{display:block;color:var(--muted);font-size:12px}
+.mode{margin-left:auto;font-size:12px;padding:3px 8px;border-radius:999px;background:var(--bot);color:var(--muted)}
+.mode.human{background:#fff3d6;color:#7a4d00}
+.log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:85%;padding:10px 12px;border-radius:var(--radius);white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--user);color:var(--user-ink);border-bottom-right-radius:4px}
+.msg.assistant,.msg.manager{align-self:flex-start;background:var(--bot);border-bottom-left-radius:4px}
+.msg.manager{border:1px solid #f0c36d}
+.msg .who{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.typing{color:var(--muted);font-size:13px;padding:0 4px}
+form.input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+form.input input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit}
+button.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
+button.primary:disabled{opacity:.5;cursor:default}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+.invoice{align-self:stretch;border:1px solid var(--line);border-radius:var(--radius);padding:12px;background:var(--panel)}
+.invoice .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.invoice table{width:100%;border-collapse:collapse;font-size:14px}
+.invoice td{padding:3px 0}.invoice td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.invoice .total td{border-top:1px solid var(--line);font-weight:700;padding-top:6px}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bot);color:var(--muted);letter-spacing:.03em}
+.badge.PAID{background:#d8f5e9;color:#0b6b48}.badge.AWAITING_PAYMENT,.badge.PROCESSING,.badge.PARTIAL{background:#fff3d6;color:#7a4d00}
+.badge.FAILED,.badge.REFUNDED,.badge.EXPIRED{background:#fde2e2;color:#9b1c1c}
+.pay{margin-top:10px;display:grid;gap:8px}
+.pay label{font-size:12px;color:var(--muted)}
+.pay select,.pay input{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;font:inherit;font-size:14px}
+.deposit{display:grid;grid-template-columns:116px 1fr;gap:12px;align-items:center}
+.qr{background:#fff;padding:6px;border-radius:8px;width:116px;height:116px}
+.addr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;word-break:break-all;background:var(--bg);border-radius:8px;padding:6px 8px}
+.amount{font-size:18px;font-weight:700}
+.note{font-size:12px;color:var(--muted)}
+.err{color:var(--bad);font-size:13px}
+.paid{color:var(--ok);font-weight:600}
+.demo{border:1px dashed var(--warn);color:var(--warn)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section>
+    <span class="tag">NEAR HACKATHON · Real-World Money</span>
+    <h1>An AI sales assistant that gets you paid in any crypto.</h1>
+    <p class="lead">The customer chats in their own language, the assistant builds the invoice, and the customer pays it with whatever they hold: ETH, SOL, BTC, USDT on Tron, NEAR. <b>NEAR Intents</b> routes it, and the business receives <b>USDC on NEAR</b>. If the AI is not enough, a human manager takes over the same chat.</p>
+    <ol class="steps">
+      <li><b>1</b><span>Ask about services or prices. Prices come from the merchant's catalog, never from the model.</span></li>
+      <li><b>2</b><span>Say what you want to buy. The assistant issues an invoice right in the chat.</span></li>
+      <li><b>3</b><span>Pick any token and chain. You get a one-time deposit address from 1Click.</span></li>
+      <li><b>4</b><span>Pay. The invoice flips to <i>Paid</i> when USDC lands in the merchant's NEAR account.</span></li>
+    </ol>
+    <div>Try:</div>
+    <div class="try">
+      <button class="chip">What do you offer?</button>
+      <button class="chip">I want to buy one coffee</button>
+      <button class="chip">Хочу заказать ассистента Pro</button>
+      <button class="chip">Can I talk to a manager?</button>
+    </div>
+    <p class="meta" id="meta"></p>
+  </section>
+
+  <section class="chat" aria-label="Chat with the assistant">
+    <header>
+      <div class="avatar">AI</div>
+      <div><b id="mname">Assistant</b><small>Replies in your language</small></div>
+      <span class="mode" id="mode">AI</span>
+    </header>
+    <div class="log" id="log" aria-live="polite"></div>
+    <form class="input" id="form">
+      <input id="text" autocomplete="off" placeholder="Type a message…" maxlength="2000" aria-label="Message">
+      <button class="primary" id="send">Send</button>
+    </form>
+  </section>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const log = $("#log");
+let SID; try { SID = localStorage.getItem("aishtat_sid"); } catch (e) {}
+if (!SID) { SID = "s_" + crypto.randomUUID().replace(/-/g, "").slice(0, 24); try { localStorage.setItem("aishtat_sid", SID); } catch (e) {} }
+let lastId = 0, tokens = null, health = {};
+const seen = new Set(), invoiceEls = new Map();
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const CHAIN = {near:"NEAR",eth:"Ethereum",base:"Base",arb:"Arbitrum",sol:"Solana",tron:"Tron",btc:"Bitcoin"};
+const STATUS_TEXT = {DRAFT:"Unpaid",AWAITING_PAYMENT:"Waiting for deposit",PROCESSING:"Settling",PARTIAL:"Partial deposit",PAID:"Paid",REFUNDED:"Refunded",FAILED:"Failed",EXPIRED:"Expired"};
+const FINAL = new Set(["PAID","REFUNDED","FAILED","EXPIRED"]);
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {headers: {"Content-Type": "application/json"}, ...opts});
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || r.statusText);
+  return data;
+}
+
+function addMsg(m) {
+  if (m.id && seen.has(m.id)) return;
+  if (m.id) { seen.add(m.id); lastId = Math.max(lastId, m.id); }
+  if (m.content) {
+    const d = document.createElement("div");
+    d.className = "msg " + m.role;
+    d.innerHTML = (m.role === "manager" ? '<span class="who">Manager</span>' : "") + esc(m.content);
+    log.appendChild(d);
+  }
+  (m.invoices || []).forEach(inv => renderInvoice(inv, true));
+  log.scrollTop = log.scrollHeight;
+}
+
+function setMode(mode) {
+  const el = $("#mode");
+  el.textContent = mode === "human" ? "Manager" : "AI";
+  el.className = "mode" + (mode === "human" ? " human" : "");
+}
+
+function renderInvoice(inv, append) {
+  let el = invoiceEls.get(inv.id);
+  if (!el) { el = document.createElement("div"); el.className = "invoice"; invoiceEls.set(inv.id, el); }
+  if (append && !el.isConnected) log.appendChild(el);
+  const rows = inv.lines.map(l => `<tr><td>${esc(l.name)} × ${l.qty}</td><td>$${esc(l.line_total_usd)}</td></tr>`).join("");
+  el.innerHTML = `
+    <div class="head"><b>Invoice</b><span class="badge ${inv.status}">${STATUS_TEXT[inv.status] || inv.status}</span></div>
+    <table>${rows}<tr class="total"><td>Total</td><td>$${esc(inv.total_usd)} → ${esc(inv.settlement.symbol)} on NEAR</td></tr></table>
+    <div class="pay"></div>`;
+  const pay = el.querySelector(".pay");
+  if (inv.status === "DRAFT") renderPicker(pay, inv);
+  else if (inv.payment) renderDeposit(pay, inv);
+  if (!FINAL.has(inv.status) && inv.status !== "DRAFT") schedulePoll(inv.id);
+}
+
+async function renderPicker(box, inv) {
+  if (!tokens) tokens = await api("/api/tokens");
+  const groups = {};
+  tokens.forEach(t => (groups[t.blockchain] ||= []).push(t));
+  const opts = Object.entries(groups).map(([c, ts]) =>
+    `<optgroup label="${esc(CHAIN[c] || c)}">${ts.map(t => `<option value="${esc(t.assetId)}" data-chain="${esc(c)}">${esc(t.symbol)} on ${esc(CHAIN[c] || c)}</option>`).join("")}</optgroup>`).join("");
+  box.innerHTML = `
+    <label>Pay with</label><select>${opts}</select>
+    <label>Your refund address on that chain (used only if the swap can't complete)</label>
+    <input placeholder="e.g. 0x… / alice.near / So1…" maxlength="200">
+    <button class="primary">Get payment address</button><div class="err"></div>`;
+  const [sel, inp, btn, err] = [box.querySelector("select"), box.querySelector("input"), box.querySelector("button"), box.querySelector(".err")];
+  btn.onclick = async () => {
+    err.textContent = ""; btn.disabled = true; btn.textContent = "Getting a quote…";
+    try { renderInvoice(await api(`/api/invoices/${inv.id}/pay`, {method: "POST", body: JSON.stringify({origin_asset: sel.value, refund_to: inp.value})})); }
+    catch (e) { err.textContent = e.message; btn.disabled = false; btn.textContent = "Get payment address"; }
+  };
+}
+
+function renderDeposit(box, inv) {
+  const p = inv.payment, chain = CHAIN[p.origin_chain] || p.origin_chain;
+  if (inv.status === "PAID") {
+    const near = (p.swap_details?.nearTxHashes || [])[0];
+    box.innerHTML = `<div class="paid">✓ Paid with ${esc(p.amount_in_formatted)} ${esc(p.origin_symbol)} on ${esc(chain)}. ${esc(inv.settlement.symbol)} delivered to ${esc(inv.settlement.recipient)}.</div>` +
+      (near && p.mode === "live" ? `<a class="note" target="_blank" rel="noopener" href="https://nearblocks.io/txns/${esc(near)}">View on NearBlocks</a>` : "");
+    return;
+  }
+  if (FINAL.has(inv.status)) { box.innerHTML = `<div class="err">${STATUS_TEXT[inv.status]}. Funds, if any, go back to ${esc(p.refund_to)}.</div>`; return; }
+  box.innerHTML = `
+    <div>Send <span class="amount">${esc(p.amount_in_formatted)} ${esc(p.origin_symbol)}</span> on ${esc(chain)} (≈ $${esc(p.amount_in_usd)})</div>
+    <div class="deposit"><div class="qr"></div><div><div class="addr">${esc(p.deposit_address)}</div>
+      ${p.deposit_memo ? `<div class="note">Memo: <b>${esc(p.deposit_memo)}</b></div>` : ""}
+      <button class="ghost copy" type="button">Copy address</button></div></div>
+    <div class="note">${inv.status === "PROCESSING" ? "Deposit received, settling to USDC on NEAR…" : "Waiting for your deposit."} Quote valid until ${new Date(p.deadline).toLocaleTimeString()}. Overpayment is refunded automatically.</div>
+    ${p.mode === "mock" && inv.status === "AWAITING_PAYMENT" ? '<button class="ghost demo" type="button">Simulate payment (demo mode)</button>' : ""}`;
+  try { new QRCode(box.querySelector(".qr"), {text: p.deposit_address, width: 104, height: 104}); } catch (e) { box.querySelector(".qr").remove(); box.querySelector(".deposit").style.gridTemplateColumns = "1fr"; }
+  box.querySelector(".copy").onclick = () => navigator.clipboard?.writeText(p.deposit_address);
+  const demo = box.querySelector(".demo");
+  if (demo) demo.onclick = async () => renderInvoice(await api(`/api/demo/invoices/${inv.id}/simulate-deposit`, {method: "POST"}));
+}
+
+const polling = new Set();
+function schedulePoll(id) {
+  if (polling.has(id)) return; polling.add(id);
+  const tick = async () => {
+    try { const inv = await api(`/api/invoices/${id}`); renderInvoice(inv); if (FINAL.has(inv.status)) { polling.delete(id); return; } } catch (e) {}
+    setTimeout(tick, 4000);
+  };
+  setTimeout(tick, 4000);
+}
+
+async function send(text) {
+  if (!text.trim()) return;
+  addMsg({role: "user", content: text});
+  $("#send").disabled = true;
+  const t = document.createElement("div"); t.className = "typing"; t.textContent = "typing…"; log.appendChild(t);
+  try {
+    const out = await api("/api/chat", {method: "POST", body: JSON.stringify({session_id: SID, message: text})});
+    out.messages.forEach(addMsg); setMode(out.mode);
+    // our own user message now has an id server-side; skip it in polling
+    const all = await api(`/api/chat/${SID}/messages?after=0`); all.messages.forEach(m => m.role === "user" && seen.add(m.id));
+  } catch (e) { addMsg({role: "assistant", content: "⚠ " + e.message}); }
+  t.remove(); $("#send").disabled = false;
+}
+
+$("#form").onsubmit = e => { e.preventDefault(); const v = $("#text").value; $("#text").value = ""; send(v); };
+document.querySelectorAll(".chip").forEach(b => b.onclick = () => send(b.textContent));
+
+(async () => {
+  try {
+    health = await api("/api/health");
+    $("#mname").textContent = health.merchant;
+    $("#meta").innerHTML = `Payments: <b>${health.oneclick_mode === "live" ? "live NEAR Intents (mainnet)" : "demo mode (simulated 1Click)"}</b> · Model: <code>${esc(health.llm)}</code> · Settles to <code>${esc(health.settles_to.account)}</code>`;
+    const hist = await api(`/api/chat/${SID}/messages?after=0`);
+    hist.messages.forEach(addMsg); setMode(hist.mode);
+    if (!hist.messages.length) addMsg({role: "assistant", content: `Hi! I'm the assistant of ${health.merchant}. Ask me anything, in any language.`});
+  } catch (e) { addMsg({role: "assistant", content: "⚠ " + e.message}); }
+  // manager replies arrive by polling
+  setInterval(async () => {
+    try { const r = await api(`/api/chat/${SID}/messages?after=${lastId}`); r.messages.filter(m => m.role !== "user").forEach(addMsg); r.messages.forEach(m => seen.add(m.id)); setMode(r.mode); } catch (e) {}
+  }, 4000);
+})();
+</script>
+</body>
+</html>

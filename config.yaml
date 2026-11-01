@@ -1,0 +1,48 @@
+# Demo merchant. Prices live HERE, never in the model's output:
+# the assistant picks SKUs and quantities, the server computes the total.
+merchant:
+  name: "AI-Shtat Studio"
+  tagline: "AI assistants for websites and messengers"
+  languages: ["en", "ru", "es", "de", "zh"]
+  manager_name: "Sam"
+
+catalog:
+  - sku: assistant-start
+    name: "AI assistant: Start"
+    description: "Website chat assistant trained on your FAQ, 1 language, setup in 3 days."
+    price_usd: "149.00"
+  - sku: assistant-pro
+    name: "AI assistant: Pro"
+    description: "Website + Telegram assistant, up to 5 languages, handoff to manager, CRM webhook."
+    price_usd: "390.00"
+  - sku: landing
+    name: "Landing page"
+    description: "One-page website on Tilda with copywriting and a lead form."
+    price_usd: "250.00"
+  - sku: promo-video
+    name: "Promo video (30s)"
+    description: "AI-generated 30-second product video with voice-over."
+    price_usd: "120.00"
+  - sku: demo-coffee
+    name: "Demo item: one coffee"
+    description: "Cheapest item, for trying a real payment end-to-end."
+    price_usd: "1.00"
+
+payments:
+  settlement_symbol: "USDC"
+  settlement_decimals: 6
+  slippage_bps: 100          # 1%
+  quote_ttl_minutes: 30
+  # Origin assets offered in the pay widget (symbols per chain). Anything else
+  # returned by /v0/tokens is hidden to keep the picker short.
+  offered:
+    - {blockchain: near, symbol: USDC}
+    - {blockchain: near, symbol: wNEAR}
+    - {blockchain: eth,  symbol: ETH}
+    - {blockchain: eth,  symbol: USDC}
+    - {blockchain: base, symbol: USDC}
+    - {blockchain: arb,  symbol: USDC}
+    - {blockchain: sol,  symbol: SOL}
+    - {blockchain: sol,  symbol: USDC}
+    - {blockchain: tron, symbol: USDT}
+    - {blockchain: btc,  symbol: BTC}
