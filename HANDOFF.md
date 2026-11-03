@@ -59,5 +59,5 @@ _Обновлено: 2026-11-03_
 - [x] Модель Gemini: `gemini-3.8-flash`.
 - [ ] Деплой на Vercel (vercel.json готов; SQLite на /tmp — для демо ок).
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
-- [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
+- [ ] Видео-демо (сценарий и раскадровка: `docs/VIDEO.md`), пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
 - [ ] Сделать репо публичным, отправить форму до 14.11 23:59 UTC.
