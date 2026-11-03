@@ -33,7 +33,7 @@ class Settings:
     oneclick_mode: str = "mock"
     oneclick_base_url: str = "https://1click.chaindefuser.com"
     oneclick_api_key: str = ""
-    merchant_near_account: str = "merchant.near"
+    merchant_near_account: str = "wanderlust.near"
     usdc_asset_id: str = (
         "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1"
     )
@@ -80,7 +80,7 @@ def load_settings(config_path: Path | None = None, **overrides: Any) -> Settings
         oneclick_mode=_env("ONECLICK_MODE", "mock"),
         oneclick_base_url=_env("ONECLICK_BASE_URL", "https://1click.chaindefuser.com"),
         oneclick_api_key=_env("ONECLICK_API_KEY", ""),
-        merchant_near_account=_env("MERCHANT_NEAR_ACCOUNT", "merchant.near"),
+        merchant_near_account=_env("MERCHANT_NEAR_ACCOUNT", "wanderlust.near"),
         usdc_asset_id=_env("USDC_ASSET_ID", Settings.usdc_asset_id),
         llm_provider=_env("LLM_PROVIDER", "mock"),
         llm_base_url=_env("LLM_BASE_URL", "https://cloud-api.near.ai/v1"),
