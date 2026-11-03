@@ -44,5 +44,5 @@ payments:
     - {blockchain: arb,  symbol: USDC}
     - {blockchain: sol,  symbol: SOL}
     - {blockchain: sol,  symbol: USDC}
-    - {blockchain: tron, symbol: USDT}
-    - {blockchain: btc,  symbol: BTC}
+    - {blockchain: tron, symbol: USDT}   # 1Click minimum $100
+    - {blockchain: btc,  symbol: BTC}    # 1Click minimum ~0.064 BTC

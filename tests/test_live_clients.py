@@ -58,3 +58,22 @@ def test_gemini_provider_uses_openai_compatible_endpoint(settings):
     assert llm.name == "openai-compatible:gemini-x"
     assert str(llm._client.base_url).rstrip("/") == GEMINI_BASE_URL
     assert llm._client.headers["authorization"] == "Bearer g-key"
+
+
+def test_gemini_thought_signature_is_echoed_back():
+    """Gemini 3 rejects a follow-up turn whose tool call lacks its thought_signature."""
+    from app.agent import _wire_call
+
+    sig = {"google": {"thought_signature": "SIG123"}}
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"choices": [{"message": {"content": None, "tool_calls": [
+            {"id": "c1", "type": "function", "extra_content": sig,
+             "function": {"name": "show_catalog", "arguments": "{}"}}]}}]})
+
+    llm = OpenAICompatible("https://llm.example/v1", "k", "m", transport=httpx.MockTransport(handler))
+    out = asyncio.run(llm.complete([{"role": "user", "content": "hi"}], []))
+    call = out["tool_calls"][0]
+    assert call["extra_content"] == sig
+    assert _wire_call(call)["extra_content"] == sig
+    assert "extra_content" not in _wire_call({"id": "x", "name": "n", "arguments": {}})

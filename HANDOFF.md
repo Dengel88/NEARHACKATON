@@ -42,19 +42,21 @@ _Обновлено: 2026-11-03_
 - Mock-режим по умолчанию: всё работает офлайн без ключей (ИИ-судьи смогут запустить). 24 теста зелёные: `pytest -q`.
 - Живой режим через `.env`: `ONECLICK_MODE=live`, `LLM_PROVIDER=openai` (по умолчанию NEAR AI Cloud).
 - Стиль README по образцу прошлых хакатонов (arc-invoicing, neuroclip-studio): «что проверяется в коде», схема, запуск за 60 секунд.
-- Ветка `claude/project-thread-ofm9xe`.
+- Ветки: `claude/project-thread-ofm9xe` (день 1), `claude/project-thread-njna06` (живая проверка, актуальная).
 
-## Не проверено вживую
-- Из облачного контейнера Claude закрыт доступ к 1click.chaindefuser.com и cloud-api.near.ai (403 прокси).
-  Живой 1Click и LLM ещё ни разу не вызывались. Формат запросов сверен с докой и покрыт тестами на фейковом транспорте.
-- `USDC_ASSET_ID` (nep141:17208628…) проверить через `GET /v0/tokens` (blockchain=near, symbol=USDC).
-- Mock-список токенов в `app/oneclick.py` выдуман по формату; в live берётся реальный /v0/tokens.
+## Проверено вживую (2026-11-03, облачное окружение с открытой сетью)
+- Gemini: в /models актуальная стабильная flash — `gemini-3.8-flash`, стоит по умолчанию. Чат по-русски, каталог, счёт через tool call, передача менеджеру — работают.
+- Починено: Gemini 3 требует возвращать `thought_signature` (поле `extra_content` в tool_calls) на следующем ходе, иначе 400. Теперь сохраняется и отправляется обратно, есть тест.
+- 1Click `/v0/tokens`: 215 токенов, `USDC_ASSET_ID` nep141:17208628… совпадает с USDC на NEAR, все 10 offered токенов есть.
+- Dry-quote EXACT_OUTPUT $1 → wanderlust.near: NEAR/ETH/Base/Arb/Sol дают ~$1.015. Tron USDT — минимум $100, BTC — минимум ~0.064 BTC (для $1 не годятся).
+- Полный live-прогон приложения: Gemini выставил счёт, 1Click выдал реальный адрес депозита SOL, статус PENDING_DEPOSIT. Средства не отправлялись.
+- Скрипт проверки: `python scripts/check_live.py`.
 
 ## Следующие шаги
-- [ ] Прогнать live 1Click: локально у Сэма или открыть сеть контейнера для 1click.chaindefuser.com.
+- [x] Прогнать live 1Click (dry-quote и реальный quote без оплаты).
 - [x] NEAR-аккаунт мерчанта и адрес для приза: `wanderlust.near` (стоит по умолчанию в config и .env.example).
-- [x] LLM: решено Gemini (`LLM_PROVIDER=gemini`, `GEMINI_API_KEY`). Код готов, живой вызов ждёт ключ в переменных окружения (в чат ключ не присылать).
-- [ ] Проверить актуальную модель Gemini через /models, когда будет ключ.
+- [x] LLM: решено Gemini (`LLM_PROVIDER=gemini`, `GEMINI_API_KEY`). Ключ в env облачного окружения, живой вызов проверен (в чат ключ не присылать).
+- [x] Модель Gemini: `gemini-3.8-flash`.
 - [ ] Деплой на Vercel (vercel.json готов; SQLite на /tmp — для демо ок).
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
 - [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
