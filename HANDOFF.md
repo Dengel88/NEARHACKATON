@@ -57,7 +57,10 @@ _Обновлено: 2026-11-03_
 - [x] NEAR-аккаунт мерчанта и адрес для приза: `wanderlust.near` (стоит по умолчанию в config и .env.example).
 - [x] LLM: решено Gemini (`LLM_PROVIDER=gemini`, `GEMINI_API_KEY`). Ключ в env облачного окружения, живой вызов проверен (в чат ключ не присылать).
 - [x] Модель Gemini: `gemini-3.8-flash`.
-- [ ] Деплой на Vercel (vercel.json готов; SQLite на /tmp — для демо ок).
+- [x] Деплой подготовлен (2026-11-03, ветка claude/project-thread-ookpc1): Dockerfile + docker-compose с Caddy (авто-HTTPS), DEPLOY.md. Образ собран и проверен локально, данные переживают рестарт.
+  Vercel: работает, но SQLite в /tmp у каждого инстанса свой, данные могут теряться. Для судей — Docker на VPS.
+  Хостинги пользователя: VPS Vdsina, резервный, xorek (Ubuntu 22.04, 2 vCPU/4 GB), список в D:\AI\Хостинги\hosts.txt. Домен: предложен pay.synndicate.ru.
+- [ ] Выбрать сервер и домен, прописать A-запись, `docker compose up -d --build`. На публичном деплое задать MERCHANT_DASHBOARD_TOKEN.
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
 - [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
 - [ ] Сделать репо публичным, отправить форму до 14.11 23:59 UTC.

@@ -54,6 +54,11 @@ Verified on mainnet (2026-11-03): `USDC_ASSET_ID` matches USDC on NEAR, all 10 o
 quotes at about $1.015 from NEAR, Ethereum, Base, Arbitrum and Solana. Tron USDT (min $100) and BTC (min ~0.064 BTC)
 have route minimums above small invoices; 1Click's error is shown to the customer as is.
 
+## Deploy
+
+Docker + Caddy (auto HTTPS) on any VPS: `cp .env.example .env`, set `DOMAIN` and keys, `docker compose up -d --build`.
+Vercel also works for a preview. Details and trade-offs: [DEPLOY.md](DEPLOY.md).
+
 ## How a payment works
 
 ```
@@ -97,6 +102,8 @@ app/store.py         SQLite
 web/index.html       customer chat widget with pay flow
 web/merchant.html    merchant desk: invoices, revenue, handoff queue, replies
 config.yaml          merchant, catalog, accepted tokens
+Dockerfile           production image (uvicorn, SQLite on /data volume)
+docker-compose.yml   app + Caddy with automatic HTTPS (deploy/Caddyfile)
 ```
 
 ## API
