@@ -42,6 +42,8 @@ class Settings:
     llm_base_url: str = "https://cloud-api.near.ai/v1"
     llm_api_key: str = ""
     llm_model: str = "zai-org/GLM-5.1-FP8"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.5-flash"
 
     telegram_bot_token: str = ""
     telegram_chat_id: str = ""
@@ -84,6 +86,8 @@ def load_settings(config_path: Path | None = None, **overrides: Any) -> Settings
         llm_base_url=_env("LLM_BASE_URL", "https://cloud-api.near.ai/v1"),
         llm_api_key=_env("LLM_API_KEY", ""),
         llm_model=_env("LLM_MODEL", "zai-org/GLM-5.1-FP8"),
+        gemini_api_key=_env("GEMINI_API_KEY", _env("GOOGLE_API_KEY", "")),
+        gemini_model=_env("GEMINI_MODEL", "gemini-2.5-flash"),
         telegram_bot_token=_env("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=_env("TELEGRAM_CHAT_ID", ""),
         db_path=_env("DB_PATH", "/tmp/app.db" if os.getenv("VERCEL") else "data/app.db"),

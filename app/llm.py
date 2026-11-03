@@ -19,6 +19,9 @@ import httpx
 from .config import Settings
 
 
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai"
+
+
 class LLMError(RuntimeError):
     pass
 
@@ -34,7 +37,7 @@ class LLM(ABC):
 class OpenAICompatible(LLM):
     def __init__(self, base_url: str, api_key: str, model: str, transport: httpx.AsyncBaseTransport | None = None):
         if not api_key:
-            raise LLMError("LLM_API_KEY is required for LLM_PROVIDER=openai")
+            raise LLMError("An API key is required (LLM_API_KEY or GEMINI_API_KEY)")
         self.name = f"openai-compatible:{model}"
         self._model = model
         self._client = httpx.AsyncClient(
@@ -170,4 +173,7 @@ def make_llm(settings: Settings) -> LLM:
         return MockLLM(settings)
     if settings.llm_provider == "openai":
         return OpenAICompatible(settings.llm_base_url, settings.llm_api_key, settings.llm_model)
+    if settings.llm_provider == "gemini":
+        # Gemini's OpenAI-compatible endpoint: same tool-calling wire format
+        return OpenAICompatible(GEMINI_BASE_URL, settings.gemini_api_key, settings.gemini_model)
     raise LLMError(f"Unknown LLM_PROVIDER: {settings.llm_provider}")

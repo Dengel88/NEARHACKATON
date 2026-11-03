@@ -47,3 +47,14 @@ def test_openai_compatible_parses_tool_calls_and_strips_think():
     out = asyncio.run(llm.complete([{"role": "user", "content": "hi"}], [{"type": "function"}]))
     assert out["content"] == "Sure"
     assert out["tool_calls"][0]["name"] == "get_catalog"
+
+
+def test_gemini_provider_uses_openai_compatible_endpoint(settings):
+    from dataclasses import replace
+
+    from app.llm import GEMINI_BASE_URL, make_llm
+
+    llm = make_llm(replace(settings, llm_provider="gemini", gemini_api_key="g-key", gemini_model="gemini-x"))
+    assert llm.name == "openai-compatible:gemini-x"
+    assert str(llm._client.base_url).rstrip("/") == GEMINI_BASE_URL
+    assert llm._client.headers["authorization"] == "Bearer g-key"

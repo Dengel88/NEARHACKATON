@@ -26,7 +26,7 @@ Open <http://localhost:8000>, click **"I want to buy one coffee"**, pick a token
 By default the app runs in **mock mode**: a rule-based assistant and a simulated 1Click API, so the full flow works offline with no API keys. Switch to the real thing with `.env` (see below).
 
 ```bash
-pytest -q          # 24 tests: domain rules, full payment flow, live-client request shapes
+pytest -q          # 25 tests: domain rules, full payment flow, live-client request shapes
 ```
 
 ## Live mode
@@ -38,6 +38,7 @@ Copy `.env.example` to `.env` and set:
 | `ONECLICK_MODE=live` | Real NEAR Intents 1Click API (`https://1click.chaindefuser.com`, mainnet). |
 | `ONECLICK_API_KEY` | Optional partner key. Without it 1Click adds a 0.25% fee. |
 | `MERCHANT_NEAR_ACCOUNT` | The NEAR account that receives USDC. |
+| `LLM_PROVIDER=gemini` + `GEMINI_API_KEY` | Google Gemini through its OpenAI-compatible endpoint (`GEMINI_MODEL`, default `gemini-2.5-flash`). |
 | `LLM_PROVIDER=openai` | Any OpenAI-compatible endpoint with tool calling. |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | Defaults point to **NEAR AI Cloud** (private inference in TEEs). |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Optional: ping the manager in Telegram on handoff. |
