@@ -57,7 +57,8 @@ have route minimums above small invoices; 1Click's error is shown to the custome
 ## Deploy
 
 Docker + Caddy (auto HTTPS) on any VPS: `cp .env.example .env`, set `DOMAIN` and keys, `docker compose up -d --build`.
-Vercel also works for a preview. Details and trade-offs: [DEPLOY.md](DEPLOY.md).
+Vercel: import the repo and set `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` (free Turso libSQL) so all serverless
+instances share one database. Step by step: [DEPLOY.md](DEPLOY.md).
 
 ## How a payment works
 
@@ -98,7 +99,7 @@ app/llm.py           OpenAI-compatible provider (NEAR AI Cloud) + offline mock
 app/oneclick.py      1Click client (live) + simulator (mock)
 app/payments.py      invoice payment lifecycle
 app/domain.py        business rules
-app/store.py         SQLite
+app/store.py         SQLite: local file, or Turso/libSQL over HTTP for serverless
 web/index.html       customer chat widget with pay flow
 web/merchant.html    merchant desk: invoices, revenue, handoff queue, replies
 config.yaml          merchant, catalog, accepted tokens

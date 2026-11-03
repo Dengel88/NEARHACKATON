@@ -60,7 +60,10 @@ _Обновлено: 2026-11-03_
 - [x] Деплой подготовлен (2026-11-03, ветка claude/project-thread-ookpc1): Dockerfile + docker-compose с Caddy (авто-HTTPS), DEPLOY.md. Образ собран и проверен локально, данные переживают рестарт.
   Vercel: работает, но SQLite в /tmp у каждого инстанса свой, данные могут теряться. Для судей — Docker на VPS.
   Хостинги пользователя: VPS Vdsina, резервный, xorek (Ubuntu 22.04, 2 vCPU/4 GB), список в D:\AI\Хостинги\hosts.txt. Домен: предложен pay.synndicate.ru.
-- [ ] Выбрать сервер и домен, прописать A-запись, `docker compose up -d --build`. На публичном деплое задать MERCHANT_DASHBOARD_TOKEN.
+- [x] Решение Сэма (03.11): пока Vercel, потом домен pay.synndicate.ai (synndicate.ai регистрируется).
+  Чтобы Vercel не терял данные: Store умеет Turso/libSQL по HTTP (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`), mock 1Click тоже хранит состояние в БД. Тест с фейковым Hrana-сервером, два инстанса видят одни данные. С реальным Turso ещё не проверено (нужен аккаунт).
+- [ ] Сэм: аккаунт Turso (free) и Vercel, импорт репо, env по таблице в DEPLOY.md. Проверка: /api/health → "storage": "turso".
+- [ ] Привязать pay.synndicate.ai в Vercel → Domains (CNAME).
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
 - [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
 - [ ] Сделать репо публичным, отправить форму до 14.11 23:59 UTC.

@@ -55,9 +55,9 @@ def create_app(
     store: Store | None = None,
 ) -> FastAPI:
     s = settings or get_settings()
-    store = store or Store(s.db_path)
+    store = store or Store(s.db_path, s.turso_url, s.turso_token)
     oneclick = oneclick or (
-        LiveOneClick(s.oneclick_base_url, s.oneclick_api_key) if s.oneclick_mode == "live" else MockOneClick()
+        LiveOneClick(s.oneclick_base_url, s.oneclick_api_key) if s.oneclick_mode == "live" else MockOneClick(store)
     )
     llm = llm or make_llm(s)
     agent = Agent(s, store, llm)
@@ -104,6 +104,7 @@ def create_app(
             "ok": True,
             "oneclick_mode": oneclick.mode,
             "llm": llm.name,
+            "storage": store.backend,
             "merchant": s.merchant["name"],
             "settles_to": {"account": s.merchant_near_account, "asset": s.usdc_asset_id},
         }

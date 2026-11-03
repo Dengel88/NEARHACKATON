@@ -49,6 +49,8 @@ class Settings:
     telegram_chat_id: str = ""
 
     db_path: str = "data/app.db"
+    turso_url: str = ""      # libsql://<db>.turso.io: shared DB for serverless
+    turso_token: str = ""
     dashboard_token: str = ""
 
     extra: dict[str, Any] = field(default_factory=dict)
@@ -91,6 +93,8 @@ def load_settings(config_path: Path | None = None, **overrides: Any) -> Settings
         telegram_bot_token=_env("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=_env("TELEGRAM_CHAT_ID", ""),
         db_path=_env("DB_PATH", "/tmp/app.db" if os.getenv("VERCEL") else "data/app.db"),
+        turso_url=_env("TURSO_DATABASE_URL", ""),
+        turso_token=_env("TURSO_AUTH_TOKEN", ""),
         dashboard_token=_env("MERCHANT_DASHBOARD_TOKEN", ""),
     )
     values.update(overrides)

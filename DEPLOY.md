@@ -31,13 +31,35 @@ Without a domain (quick check on the IP, plain HTTP):
 
 ## B. Vercel (serverless)
 
-`vercel.json` is ready: `vercel --prod`, then add the same env vars in the
-Vercel dashboard. Payment status works on serverless because the browser
-polls `/api/invoices/{id}` and each poll asks 1Click directly; there are no
-background jobs.
+Payment status works on serverless: the browser polls `/api/invoices/{id}` and
+each poll asks 1Click directly; there are no background jobs.
 
-Limitation: storage is SQLite in `/tmp` of each function instance. A cold
-start or a second instance starts with an empty database, so an open chat,
-an invoice, or the merchant desk can "forget" earlier data. Mock mode keeps
-its fake deposits in memory and is affected the same way. Fine for a quick
-preview; for the judged demo use option A.
+Storage: a function instance only has its own `/tmp`, so without a shared
+database a cold start or a second instance forgets chats and invoices. Point
+the app at a free [Turso](https://turso.tech) (libSQL, SQLite-compatible)
+database and every instance uses the same data. The mock 1Click simulator
+keeps its state there too, so mock mode also works on Vercel.
+
+1. Turso (free tier): create a database, then copy its URL and a token
+   (`turso db show <db> --url`, `turso db tokens create <db>`, or the web dashboard).
+   Pick the region closest to your Vercel functions.
+2. Vercel: Add New → Project → import this GitHub repo. No build settings
+   needed, `vercel.json` covers them.
+3. Environment variables (Project → Settings → Environment Variables):
+
+   | name | value |
+   |---|---|
+   | `TURSO_DATABASE_URL` | `libsql://<db>-<org>.turso.io` |
+   | `TURSO_AUTH_TOKEN` | token from step 1 |
+   | `ONECLICK_MODE` | `live` (or `mock` for a no-money demo) |
+   | `LLM_PROVIDER` / `GEMINI_API_KEY` | `gemini` / your key |
+   | `MERCHANT_DASHBOARD_TOKEN` | long random string, protects `/merchant` |
+
+4. Redeploy, open `https://<project>.vercel.app/api/health`: it should say
+   `"storage": "turso"`.
+5. Own domain: Project → Settings → Domains → add `pay.your-domain`, then
+   create the DNS record Vercel shows (a `CNAME pay → ...vercel-dns...`).
+   HTTPS is issued automatically.
+
+Without `TURSO_DATABASE_URL` the app still runs on Vercel with SQLite in
+`/tmp`; fine for a quick look, not for a judged demo.
