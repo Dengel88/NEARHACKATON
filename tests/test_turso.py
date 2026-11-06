@@ -126,3 +126,9 @@ def test_two_instances_share_state(settings, monkeypatch):
     done = a.post(f"/api/demo/invoices/{inv['id']}/simulate-deposit").json()
     assert done["status"] == "PAID"
     assert b.get("/api/merchant/overview").json()["stats"]["paid"] == 1
+
+
+def test_bad_turso_settings_do_not_crash_the_app(settings):
+    s = __import__("dataclasses").replace(settings, turso_url="https://127.0.0.1:9", turso_token="bad", db_path=":memory:")
+    h = TestClient(create_app(settings=s)).get("/api/health").json()
+    assert h["storage"] == "sqlite" and "storage_error" in h

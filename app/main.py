@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import os
 import re
 import secrets
 from typing import Any
@@ -18,6 +20,7 @@ from .oneclick import LiveOneClick, MockOneClick, OneClick, OneClickError
 from .payments import Payments
 from .store import Store
 
+log = logging.getLogger("aishtat")
 WEB = ROOT / "web"
 SESSION_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
@@ -55,7 +58,14 @@ def create_app(
     store: Store | None = None,
 ) -> FastAPI:
     s = settings or get_settings()
-    store = store or Store(s.db_path, s.turso_url, s.turso_token)
+    storage_error = ""
+    if store is None:
+        try:
+            store = Store(s.db_path, s.turso_url, s.turso_token)
+        except Exception as exc:  # bad Turso URL/token must not take the whole site down
+            storage_error = f"{type(exc).__name__}: {exc}"[:300]
+            log.error("Shared database unavailable, falling back to local SQLite: %s", storage_error)
+            store = Store("/tmp/app.db" if os.getenv("VERCEL") else s.db_path)
     oneclick = oneclick or (
         LiveOneClick(s.oneclick_base_url, s.oneclick_api_key) if s.oneclick_mode == "live" else MockOneClick(store)
     )
@@ -105,6 +115,7 @@ def create_app(
             "oneclick_mode": oneclick.mode,
             "llm": llm.name,
             "storage": store.backend,
+            **({"storage_error": storage_error} if storage_error else {}),
             "merchant": s.merchant["name"],
             "settles_to": {"account": s.merchant_near_account, "asset": s.usdc_asset_id},
         }

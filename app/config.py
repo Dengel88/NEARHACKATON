@@ -93,8 +93,8 @@ def load_settings(config_path: Path | None = None, **overrides: Any) -> Settings
         telegram_bot_token=_env("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=_env("TELEGRAM_CHAT_ID", ""),
         db_path=_env("DB_PATH", "/tmp/app.db" if os.getenv("VERCEL") else "data/app.db"),
-        turso_url=_env("TURSO_DATABASE_URL", ""),
-        turso_token=_env("TURSO_AUTH_TOKEN", ""),
+        turso_url=_env("TURSO_DATABASE_URL", "").strip().strip('"\''),
+        turso_token=_env("TURSO_AUTH_TOKEN", "").strip().strip('"\'').removeprefix("Bearer ").strip(),
         dashboard_token=_env("MERCHANT_DASHBOARD_TOKEN", ""),
     )
     values.update(overrides)
