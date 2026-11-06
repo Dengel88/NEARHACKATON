@@ -65,7 +65,7 @@ _Обновлено: 2026-11-03_
 - [x] Turso создан: `libsql://near-dengel88.aws-us-east-1.turso.io` (us-east-1, рядом с Vercel iad1). Токен только в env Vercel.
 - [x] Vercel-проект создан: nearhackaton.vercel.app (06.11), Production branch → claude/project-thread-ookpc1.
 - [x] Vercel работает (06.11): https://nearhackaton.vercel.app/api/health → storage turso, live 1Click, gemini-3.8-flash. Грабли: Vercel требует прямую строку `app = ...` в main.py; при сбое старта /api/health показывает traceback (app/boot.py).
-- [ ] Привязать pay.synndicate.ai в Vercel → Domains (CNAME).
+- [-] Свой домен для хакатона не нужен (решили 06.11): остаёмся на vercel.app; pay.synndicate.ai — после переезда на .ai, уже после хакатона.
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
 - [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
 - [ ] Сделать репо публичным, отправить форму до 14.11 23:59 UTC.
