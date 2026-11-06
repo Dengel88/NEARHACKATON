@@ -63,7 +63,8 @@ _Обновлено: 2026-11-03_
 - [x] Решение Сэма (03.11): пока Vercel, потом домен pay.synndicate.ai (synndicate.ai регистрируется).
   Чтобы Vercel не терял данные: Store умеет Turso/libSQL по HTTP (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`), mock 1Click тоже хранит состояние в БД. Тест с фейковым Hrana-сервером, два инстанса видят одни данные. С реальным Turso ещё не проверено (нужен аккаунт).
 - [x] Turso создан: `libsql://near-dengel88.aws-us-east-1.turso.io` (us-east-1, рядом с Vercel iad1). Токен только в env Vercel.
-- [ ] Сэм: Vercel, импорт репо, env по таблице в DEPLOY.md. Проверка: /api/health → "storage": "turso".
+- [x] Vercel-проект создан: nearhackaton.vercel.app (06.11), Production branch → claude/project-thread-ookpc1.
+- [ ] Проверить Vercel, импорт репо, env по таблице в DEPLOY.md. Проверка: /api/health → "storage": "turso".
 - [ ] Привязать pay.synndicate.ai в Vercel → Domains (CNAME).
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
 - [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
