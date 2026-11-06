@@ -62,7 +62,8 @@ _Обновлено: 2026-11-03_
   Хостинги пользователя: VPS Vdsina, резервный, xorek (Ubuntu 22.04, 2 vCPU/4 GB), список в D:\AI\Хостинги\hosts.txt. Домен: предложен pay.synndicate.ru.
 - [x] Решение Сэма (03.11): пока Vercel, потом домен pay.synndicate.ai (synndicate.ai регистрируется).
   Чтобы Vercel не терял данные: Store умеет Turso/libSQL по HTTP (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`), mock 1Click тоже хранит состояние в БД. Тест с фейковым Hrana-сервером, два инстанса видят одни данные. С реальным Turso ещё не проверено (нужен аккаунт).
-- [ ] Сэм: аккаунт Turso (free) и Vercel, импорт репо, env по таблице в DEPLOY.md. Проверка: /api/health → "storage": "turso".
+- [x] Turso создан: `libsql://near-dengel88.aws-us-east-1.turso.io` (us-east-1, рядом с Vercel iad1). Токен только в env Vercel.
+- [ ] Сэм: Vercel, импорт репо, env по таблице в DEPLOY.md. Проверка: /api/health → "storage": "turso".
 - [ ] Привязать pay.synndicate.ai в Vercel → Domains (CNAME).
 - [ ] Реальная оплата $1 «кофе» с другой сети для видео.
 - [ ] Видео-демо, пост в X (@NEARProtocol #NEARHackathon), SUBMISSION.md с текстами для формы.
