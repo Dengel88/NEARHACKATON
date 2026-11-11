@@ -111,3 +111,17 @@ def test_dashboard_token_may_be_non_ascii(settings):
     assert c.get("/api/merchant/overview", params={"token": "придумай-пароль"}).status_code == 200
     assert c.get("/api/merchant/overview", params={"token": "wrong"}).status_code == 401
     assert c.get("/api/merchant/overview", params={"token": "неверный"}).status_code == 401
+
+
+def test_desk_expires_abandoned_payments(client):
+    out = _chat(client, "I want to buy 1 coffee", sid="abandoned-session")
+    inv = out["messages"][-1]["invoices"][0]
+    tokens = client.get("/api/tokens").json()
+    sol = next(t for t in tokens if t["symbol"] == "SOL")
+    client.post(f"/api/invoices/{inv['id']}/pay", json={"origin_asset": sol["assetId"], "refund_to": "So1anaRefund1"})
+    store = client.app.state.store
+    stored = store.get_invoice(inv["id"])
+    stored["payment"]["deadline"] = "2020-01-01T00:00:00Z"
+    store.save_invoice(stored)
+    ov = client.get("/api/merchant/overview").json()
+    assert next(i for i in ov["invoices"] if i["id"] == inv["id"])["status"] == "EXPIRED"

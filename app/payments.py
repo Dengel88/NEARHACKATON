@@ -121,6 +121,12 @@ class Payments:
         self.store.save_invoice(inv)
         return inv
 
+    @staticmethod
+    def is_stale(inv: dict[str, Any]) -> bool:
+        """Awaiting payment past the quote deadline: due a final status check."""
+        pay = inv.get("payment") or {}
+        return inv.get("status") == InvoiceStatus.AWAITING_PAYMENT.value and _past(pay.get("deadline"))
+
     async def submit_tx(self, invoice_id: str, tx_hash: str) -> dict[str, Any]:
         """Optional speed-up: tell 1Click about the deposit tx right away."""
         inv = self._get(invoice_id)

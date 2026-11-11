@@ -173,6 +173,14 @@ def create_app(
     @app.get("/api/merchant/overview", dependencies=[Depends(merchant_auth)])
     async def overview() -> dict[str, Any]:
         invoices = store.list_invoices()
+        # Abandoned payments only expire when someone polls them; the customer
+        # tab is gone, so settle them here (one 1Click status call each).
+        for n, inv in enumerate(invoices):
+            if payments.is_stale(inv):
+                try:
+                    invoices[n] = await payments.refresh(inv["id"], force=True)
+                except Exception:  # never let one bad invoice break the desk
+                    log.exception("refresh failed for %s", inv.get("id"))
         paid = [i for i in invoices if i["status"] == "PAID"]
         return {
             "merchant": s.merchant,
