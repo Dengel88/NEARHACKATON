@@ -50,3 +50,28 @@
 ## Домен
 
 Вариант по умолчанию: деплой на Vercel (`vercel.json` уже есть) и поддомен **pay.synndicate.ru** через CNAME на Vercel — бесплатно и связывает с брендом AI-Штат. Отдельный новый домен (например `aishtatpay.xyz`) стоит денег — только по согласию.
+
+---
+
+## v2: стиль как у Arc Invoicing и Neuroclip (2026-11-12)
+
+Берём каркас Arc Invoicing (85 сек, «было/стало» за 20 сек, живое демо, слайд с доказательствами, финал со ссылками)
+и из Neuroclip: роли агентов как понятные персонажи и UI-демо как доказательство, что это не концепт.
+
+- **Фон:** тёмный графит `#0A0E17` с шумом и светящейся сеткой. Акцент NEAR-зелёный `#00EC97` (успех, Paid), второй акцент белый.
+- **Шрифты:** Inter / Space Grotesk для заголовков, JetBrains Mono для адресов, сумм и хэшей.
+- **Голос:** ИИ-диктор EN (ElevenLabs), спокойный «tech narrator». Ambient-synth и SFX: клики, whoosh, «дзынь» на Paid.
+- **Титры:** не караоке, а смысловая типографика прямо в кадре.
+- **Моушн:** кодом (HTML/GSAP → MP4): точные схемы и цифры без артефактов ИИ-генерации.
+
+| # | Время | Кадр | Озвучка (EN) | Источник |
+|---|---|---|---|---|
+| 1 | 0:00–0:08 | Сетка, кинетическая типографика: «Customer holds SOL. Shop wants dollars.» Логотипы 6 сетей сыплются | «Your customer pays in SOL. Your shop needs dollars. Today that's six steps, three apps and a bridge.» | Моушн |
+| 2 | 0:08–0:16 | Схема «как сейчас»: Wallet → Bridge → DEX → Gas → Merchant, пунктир, красные «+2%», «10 min» | «Most small shops just lose the sale.» | Моушн-схема |
+| 3 | 0:16–0:28 | Решение: 2 функции на сетке `create_invoice(sku, qty)` → `1Click quote EXACT_OUTPUT` → USDC on NEAR | «AI-Shtat Pay: an AI sales assistant that sells in chat, and NEAR Intents that settles any token into exact USDC.» | Моушн |
+| 4 | 0:28–0:38 | 3 карточки с галочками: «Any token, any chain» · «Merchant gets exactly the invoice» · «Prices enforced in code, not the prompt» | — (озвучка зачитывает карточки) | Инфографика |
+| 5 | 0:38–0:52 | Живое демо: чат по-русски → счёт $1 → SOL → адрес депозита | «A customer asks in Russian. The assistant replies in Russian and issues a one-dollar invoice.» | Досъёмка 1 |
+| 6 | 0:52–1:02 | Phantom: адрес, 0.012 SOL, подтверждение, «Отправлено!» → вкладка счёта **Paid** | «They pay from Phantom in SOL. Under a minute later: Paid.» | Запись 1:47–2:12 + досъёмка 2 |
+| 7 | 1:02–1:10 | NearBlocks: 1 USDC на wanderlust.near, зум на сумму и хэш | «That's mainnet. One coffee, exactly one USDC to the merchant.» | Досъёмка 3 |
+| 8 | 1:10–1:18 | Bento-слайд доказательств: 26 tests · mock mode runs with zero keys · 10 tokens / 6 chains · real tx hash · human handoff | «Open source, tested, and it runs offline in demo mode for anyone.» | Инфографика + кадр /merchant |
+| 9 | 1:18–1:28 | Финальная карточка: логотип, nearhackaton.vercel.app, GitHub, «Built at NEAR HACKATHON» @NEARProtocol #NEARHackathon | «AI-Shtat Pay. Sell in any language. Get paid from any chain.» | Финальная плашка |
