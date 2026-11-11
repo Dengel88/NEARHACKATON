@@ -96,3 +96,18 @@ def test_unexpected_errors_return_json_detail(settings):
     c = TestClient(create_app(settings=settings, store=store), raise_server_exceptions=False)
     r = c.get("/api/merchant/overview")
     assert r.status_code == 500 and "RuntimeError: boom" in r.json()["detail"]
+
+
+def test_dashboard_token_may_be_non_ascii(settings):
+    import dataclasses
+
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+    from app.store import Store
+
+    s = dataclasses.replace(settings, dashboard_token="придумай-пароль")
+    c = TestClient(create_app(settings=s, store=Store(":memory:")))
+    assert c.get("/api/merchant/overview", params={"token": "придумай-пароль"}).status_code == 200
+    assert c.get("/api/merchant/overview", params={"token": "wrong"}).status_code == 401
+    assert c.get("/api/merchant/overview", params={"token": "неверный"}).status_code == 401

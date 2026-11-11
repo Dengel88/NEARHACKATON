@@ -82,7 +82,7 @@ def create_app(
         return sid
 
     def merchant_auth(token: str = Query(default="")) -> None:
-        if s.dashboard_token and not secrets.compare_digest(token, s.dashboard_token):
+        if s.dashboard_token and not secrets.compare_digest(token.encode(), s.dashboard_token.encode()):
             raise HTTPException(401, "Bad dashboard token")
 
     @app.exception_handler(DomainError)
