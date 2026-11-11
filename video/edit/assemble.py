@@ -36,10 +36,10 @@ for k, (_, d, vo) in enumerate(segs):
     if vo:
         inputs += ["-i", P(vo["file"])]; n = len(inputs)//2 - 1  # video=0, music=1 (4 args), VOs from 2
         ms = int((t + vo.get("at", 0.3)) * 1000)
-        filt.append(f"[{n}:a]aresample=48000,adelay={ms}|{ms},volume=1.6[v{n}]"); vo_labels.append(f"[v{n}]")
+        filt.append(f"[{n}:a]loudnorm=I=-17:TP=-4:LRA=9,aresample=48000,adelay={ms}|{ms}[v{n}]"); vo_labels.append(f"[v{n}]")
     t += d
 filt.append(f"{''.join(vo_labels)}amix=inputs={len(vo_labels)}:normalize=0,apad[vo]")
-filt.append(f"[1:a]aresample=48000,atrim=0:{total},afade=t=out:st={total-2.5}:d=2.5,volume=0.35[mus]")
-filt.append(f"[vo]asplit[vo1][vo2];[mus][vo2]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=400[duck];[duck][vo1]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.95,atrim=0:{total}[a]")
+filt.append(f"[1:a]aresample=48000,atrim=0:{total},afade=t=out:st={total-2.5}:d=2.5,volume=0.18[mus]")
+filt.append(f"[vo]asplit[vo1][vo2];[mus][vo2]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=400[duck];[duck][vo1]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.8:attack=5:release=80,atrim=0:{total}[a]")
 sh("ffmpeg","-v","error","-y","-i",video,*inputs,"-filter_complex",";".join(filt),"-map","0:v","-map","[a]","-c:v","copy","-c:a","aac","-b:a","192k","-t",str(total),OUT)
 print("total", total)
