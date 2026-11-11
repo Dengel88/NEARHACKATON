@@ -83,3 +83,16 @@ def test_handoff_silences_ai_until_released(client):
 def test_bad_session_id(client):
     r = client.post("/api/chat", json={"session_id": "../x", "message": "hi"})
     assert r.status_code == 400
+
+
+def test_unexpected_errors_return_json_detail(settings):
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+    from app.store import Store
+
+    store = Store(":memory:")
+    store.list_sessions = lambda limit=50: (_ for _ in ()).throw(RuntimeError("boom"))  # type: ignore[assignment]
+    c = TestClient(create_app(settings=settings, store=store), raise_server_exceptions=False)
+    r = c.get("/api/merchant/overview")
+    assert r.status_code == 500 and "RuntimeError: boom" in r.json()["detail"]

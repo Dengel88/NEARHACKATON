@@ -91,6 +91,15 @@ def create_app(
 
         return JSONResponse({"detail": str(exc)}, status_code=422)
 
+    @app.exception_handler(Exception)
+    async def _unexpected(request, exc: Exception):  # type: ignore[no-untyped-def]
+        # A bare 500 hides the cause on serverless; show type + message (no secrets
+        # live in exception text here) and log the full traceback.
+        from fastapi.responses import JSONResponse
+
+        log.exception("Unhandled error on %s", request.url.path)
+        return JSONResponse({"detail": f"Internal error: {type(exc).__name__}: {exc}"[:500]}, status_code=500)
+
     @app.exception_handler(OneClickError)
     async def _oneclick(_, exc: OneClickError):  # type: ignore[no-untyped-def]
         from fastapi.responses import JSONResponse
