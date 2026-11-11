@@ -1,0 +1,16 @@
+{"music": "music.mp3",
+ "segments": [
+  {"src": "veo1.mp4", "ss": 0, "dur": 5, "vo": {"file": "vo1.wav", "at": 0.4}},
+  {"src": "motion.mp4", "ss": 8.4, "dur": 7, "vo": {"file": "vo2.wav", "at": 0.3}},
+  {"src": "motion.mp4", "ss": 16, "dur": 12, "vo": {"file": "vo3.wav", "at": 1.2}},
+  {"src": "motion.mp4", "ss": 28.6, "dur": 9.4, "vo": {"file": "vo4.wav", "at": 0.3}},
+  {"src": "A.webm", "ss": 2.0, "dur": 13, "speed": 2.0, "vo": {"file": "vo5.wav", "at": 0.5}},
+  {"kind": "phone", "src": "rec1.mp4", "ss": 110, "dur": 10, "speed": 2.2, "vo": {"file": "vo6.wav", "at": 0.5}},
+  {"src": "B.webm", "ss": 0.5, "dur": 7},
+  {"src": "veo2.mp4", "ss": 1.5, "dur": 4},
+  {"src": "rec1.mp4", "ss": 250, "dur": 7.4, "vf": "crop=1430:560:0:150", "vo": {"file": "vo7.wav", "at": 0.3}},
+  {"src": "D.webm", "ss": 6, "dur": 11, "speed": 2.1, "vo": {"file": "vo8.wav", "at": 0.8}},
+  {"src": "motion.mp4", "ss": 38.2, "dur": 6.5},
+  {"src": "veo3.mp4", "ss": 0, "dur": 4},
+  {"src": "motion.mp4", "ss": 46, "dur": 10, "vo": {"file": "vo9.wav", "at": 1.0}}
+ ]}

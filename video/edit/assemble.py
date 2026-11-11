@@ -21,7 +21,7 @@ CFG = json.load(open(os.path.join(os.path.dirname(__file__), "timeline.json")))
 segs = []
 for i, c in enumerate(CFG["segments"]):
     out = os.path.join(TMP, f"s{i:02d}.mp4")
-    if c["kind"] == "phone": phone(P(c["src"]), c["ss"], c["dur"], out, c.get("speed", 1.0))
+    if c.get("kind") == "phone": phone(P(c["src"]), c["ss"], c["dur"], out, c.get("speed", 1.0))
     else: norm(P(c["src"]), c["ss"], c["dur"], out, c.get("vf", ""), c.get("speed", 1.0))
     segs.append((out, c["dur"], c.get("vo")))
 lst = os.path.join(TMP, "list.txt")
@@ -30,16 +30,16 @@ video = os.path.join(TMP, "video.mp4")
 sh("ffmpeg","-v","error","-y","-f","concat","-safe","0","-i",lst,"-c","copy",video)
 total = sum(d for _, d, _ in segs)
 # audio: VO lines at segment start + offset, music ducked under VO
-inputs, filt, t = ["-i", P(CFG["music"])], [], 0.0
+inputs, filt, t = ["-stream_loop", "-1", "-i", P(CFG["music"])], [], 0.0
 vo_labels = []
 for k, (_, d, vo) in enumerate(segs):
     if vo:
-        inputs += ["-i", P(vo["file"])]; n = len(inputs)//2 - 1
+        inputs += ["-i", P(vo["file"])]; n = len(inputs)//2 - 1  # video=0, music=1 (4 args), VOs from 2
         ms = int((t + vo.get("at", 0.3)) * 1000)
         filt.append(f"[{n}:a]aresample=48000,adelay={ms}|{ms},volume=1.6[v{n}]"); vo_labels.append(f"[v{n}]")
     t += d
-filt.append(f"{''.join(vo_labels)}amix=inputs={len(vo_labels)}:normalize=0[vo]")
-filt.append(f"[0:a]aresample=48000,atrim=0:{total},afade=t=out:st={total-2.5}:d=2.5,volume=0.35[mus]")
-filt.append("[vo]asplit[vo1][vo2];[mus][vo2]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=400[duck];[duck][vo1]amix=inputs=2:normalize=0,alimiter=limit=0.95[a]")
-sh("ffmpeg","-v","error","-y","-i",video,*inputs,"-filter_complex",";".join(filt),"-map","0:v","-map","[a]","-c:v","copy","-c:a","aac","-b:a","192k","-shortest",OUT)
+filt.append(f"{''.join(vo_labels)}amix=inputs={len(vo_labels)}:normalize=0,apad[vo]")
+filt.append(f"[1:a]aresample=48000,atrim=0:{total},afade=t=out:st={total-2.5}:d=2.5,volume=0.35[mus]")
+filt.append(f"[vo]asplit[vo1][vo2];[mus][vo2]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=400[duck];[duck][vo1]amix=inputs=2:normalize=0:duration=first,alimiter=limit=0.95,atrim=0:{total}[a]")
+sh("ffmpeg","-v","error","-y","-i",video,*inputs,"-filter_complex",";".join(filt),"-map","0:v","-map","[a]","-c:v","copy","-c:a","aac","-b:a","192k","-t",str(total),OUT)
 print("total", total)
