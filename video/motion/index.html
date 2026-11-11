@@ -1,0 +1,150 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>AI-Shtat Pay motion</title>
+<style>
+:root{--bg:#0A0E17;--g:#00EC97;--w:#F2F5F9;--m:#8A93A6;--r:#FF5C6C;--card:#121826;--line:#1f2a3d}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:Inter,sans-serif;color:var(--w)}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;
+ background:radial-gradient(ellipse at 50% 40%,#111a2b 0%,var(--bg) 70%)}
+#grid{position:absolute;inset:-100px;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:80px 80px;opacity:.45}
+.s{position:absolute;inset:0;opacity:0}
+.abs{position:absolute}
+.h1{font-family:"Inter Display",Inter;font-weight:800;font-size:110px;letter-spacing:-3px;line-height:1.05}
+.h2{font-family:"Inter Display",Inter;font-weight:700;font-size:64px;letter-spacing:-1.5px}
+.mono{font-family:"JetBrains Mono",monospace}
+.g{color:var(--g)}.r{color:var(--r)}.m{color:var(--m)}
+.chip{padding:18px 30px;border-radius:999px;background:var(--card);border:2px solid #2a3550;font-weight:700;font-size:34px;white-space:nowrap}
+.node{width:250px;height:130px;border-radius:24px;background:var(--card);border:2px solid #2a3550;display:flex;align-items:center;justify-content:center;flex-direction:column;font-weight:700;font-size:32px}
+.node small{font-weight:500;font-size:22px;color:var(--m);margin-top:6px}
+.tag{padding:8px 18px;border-radius:12px;background:rgba(255,92,108,.12);border:1.5px solid var(--r);color:var(--r);font-weight:700;font-size:24px;white-space:nowrap}
+.box{border-radius:22px;background:var(--card);border:2px solid #2a3550;padding:26px 30px;font-size:28px;line-height:1.35}
+.box.ok{border-color:var(--g);box-shadow:0 0 60px rgba(0,236,151,.25)}
+.lbl{font-size:20px;letter-spacing:3px;text-transform:uppercase;color:var(--m);font-weight:700;margin-bottom:10px}
+.card{width:520px;height:330px;border-radius:28px;background:var(--card);border:2px solid #2a3550;padding:44px}
+.check{width:72px;height:72px;border-radius:50%;background:rgba(0,236,151,.15);border:3px solid var(--g);display:flex;align-items:center;justify-content:center;color:var(--g);font-size:40px;font-weight:900;margin-bottom:30px}
+.card h3{font-family:"Inter Display";font-size:44px;line-height:1.1;letter-spacing:-1px}
+.card p{font-size:24px;color:var(--m);margin-top:14px;line-height:1.35}
+.bento{position:absolute;border-radius:26px;background:var(--card);border:2px solid #2a3550;padding:34px}
+.big{font-family:"Inter Display";font-weight:800;font-size:96px;letter-spacing:-3px;line-height:1}
+.logo{display:flex;align-items:center;gap:28px}
+.mark{width:120px;height:120px;border-radius:30px;background:var(--g);color:#06120d;display:flex;align-items:center;justify-content:center;font-family:"Inter Display";font-weight:900;font-size:56px}
+svg{position:absolute;inset:0;overflow:visible}
+</style></head>
+<body><div id="stage"><div id="grid"></div>
+
+<!-- S1 hook 0-8 -->
+<div class="s" id="s1">
+ <div class="abs h1" id="s1a" style="left:160px;top:300px">Your customer holds <span class="g">SOL</span>.</div>
+ <div class="abs h1" id="s1b" style="left:160px;top:440px">Your shop needs <span class="g">dollars</span>.</div>
+ <div id="chips"></div>
+</div>
+
+<!-- S2 problem 8-16 -->
+<div class="s" id="s2">
+ <div class="abs lbl" style="left:160px;top:150px;font-size:26px">Crypto checkout today</div>
+ <svg width="1920" height="1080"><path id="s2path" d="M285 520 H1635" stroke="#3a4766" stroke-width="4" stroke-dasharray="14 12" fill="none"/></svg>
+ <div id="nodes"></div>
+ <div class="abs h1 r" id="s2end" style="left:0;width:1920px;text-align:center;top:780px;font-size:96px">The sale is lost.</div>
+</div>
+
+<!-- S3 solution 16-28 -->
+<div class="s" id="s3">
+ <div class="abs logo" id="s3logo" style="left:0;width:1920px;justify-content:center;top:120px">
+  <div class="mark">AI</div><div class="h1" style="font-size:96px">AI-Shtat <span class="g">Pay</span></div></div>
+ <svg width="1920" height="1080"><path id="s3path" d="M420 640 H1500" stroke="#00EC97" stroke-width="4" fill="none" stroke-dasharray="1080" stroke-dashoffset="1080"/>
+  <circle id="s3dot" r="12" fill="#00EC97" cx="420" cy="640" opacity="0"/></svg>
+ <div class="abs box" id="b1" style="left:110px;top:520px;width:400px"><div class="lbl">Customer · chat</div>«Хочу кофе,<br>оплачу в SOL»</div>
+ <div class="abs box mono" id="b2" style="left:560px;top:520px;width:400px;font-size:24px"><div class="lbl" style="font-family:Inter">AI assistant</div>create_invoice(<br>&nbsp;sku="demo-coffee",<br>&nbsp;qty=1) → $1.00</div>
+ <div class="abs box mono" id="b3" style="left:1010px;top:520px;width:400px;font-size:24px"><div class="lbl" style="font-family:Inter">NEAR Intents · 1Click</div>quote(<br>&nbsp;SOL → USDC,<br>&nbsp;EXACT_OUTPUT)</div>
+ <div class="abs box ok" id="b4" style="left:1460px;top:520px;width:360px"><div class="lbl">Merchant</div><span class="mono g" style="font-size:40px;font-weight:800">1.000000</span><br>USDC on NEAR<br><span class="mono m" style="font-size:22px">wanderlust.near</span></div>
+</div>
+
+<!-- S4 cards 28-38 -->
+<div class="s" id="s4">
+ <div class="abs h2" id="s4t" style="left:0;width:1920px;text-align:center;top:150px">Why it works</div>
+ <div class="abs card" id="c1" style="left:140px;top:380px"><div class="check">✓</div><h3>Any token,<br>any chain</h3><p>ETH, SOL, USDC on L2s, NEAR. One deposit address.</p></div>
+ <div class="abs card" id="c2" style="left:700px;top:380px"><div class="check">✓</div><h3>Exactly the<br>invoice amount</h3><p>EXACT_OUTPUT: slippage stays with the payer.</p></div>
+ <div class="abs card" id="c3" style="left:1260px;top:380px"><div class="check">✓</div><h3>Prices in code,<br>not in the prompt</h3><p>The model picks SKUs. The server sets the total.</p></div>
+</div>
+
+<!-- S8 proof 38-46 -->
+<div class="s" id="s8">
+ <div class="abs h2" style="left:140px;top:110px">Built, tested, on mainnet</div>
+ <div class="bento" id="p1" style="left:140px;top:240px;width:540px;height:300px"><div class="lbl">Tests</div><div class="big g">26</div><p class="m" style="font-size:26px;margin-top:16px">domain rules · payment flow · live clients</p></div>
+ <div class="bento" id="p2" style="left:710px;top:240px;width:540px;height:300px"><div class="lbl">Keys to try it</div><div class="big">0</div><p class="m" style="font-size:26px;margin-top:16px">mock mode runs fully offline</p></div>
+ <div class="bento" id="p3" style="left:1280px;top:240px;width:500px;height:300px"><div class="lbl">Pay with</div><div class="big">10</div><p class="m" style="font-size:26px;margin-top:16px">tokens across 6 chains</p></div>
+ <div class="bento" id="p4" style="left:140px;top:570px;width:1110px;height:330px"><div class="lbl">Real mainnet payment · Nov 11, 2026</div>
+  <div class="mono" style="font-size:34px;margin-top:18px">0.012 SOL <span class="m">→</span> <span class="g" style="font-weight:800">1.0 USDC</span> <span class="m">→</span> wanderlust.near</div>
+  <div class="mono m" style="font-size:22px;margin-top:22px;line-height:1.6">near tx&nbsp; EL7xz1A4j9vf2DxG2qDyfw49nh2J439pBu7QESQfmdoQ<br>status&nbsp;&nbsp; <span class="g">SUCCESS</span> · settled in &lt; 1 min</div></div>
+ <div class="bento" id="p5" style="left:1280px;top:570px;width:500px;height:330px"><div class="lbl">Human in the loop</div><div class="h2" style="font-size:48px;margin-top:10px;line-height:1.1">Manager takes over the same chat</div></div>
+</div>
+
+<!-- S9 outro 46-56 -->
+<div class="s" id="s9">
+ <div class="abs logo" id="s9logo" style="left:0;width:1920px;justify-content:center;top:250px">
+  <div class="mark">AI</div><div class="h1">AI-Shtat <span class="g">Pay</span></div></div>
+ <div class="abs h2" id="s9tag" style="left:0;width:1920px;text-align:center;top:440px;font-weight:600">Sell in any language. Get paid from any chain.</div>
+ <div class="abs mono" id="s9links" style="left:0;width:1920px;text-align:center;top:600px;font-size:34px;line-height:1.8">
+  <span class="g">nearhackaton.vercel.app</span><br><span class="m">github.com/Dengel88/NEARHACKATON</span></div>
+ <div class="abs" id="s9foot" style="left:0;width:1920px;text-align:center;top:880px;font-size:30px;font-weight:600;color:var(--m)">Built at NEAR HACKATHON · @NEARProtocol · #NEARHackathon</div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const p=(t,a,b)=>cl((t-a)/(b-a));
+const eo=x=>1-Math.pow(1-x,3);            // ease out cubic
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c=1.70158;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+function inUp(el,t,a,d=.6,dy=40){const k=eo(p(t,a,a+d));el.style.opacity=k;el.style.transform=`translateY(${(1-k)*dy}px)`;}
+function scene(el,t,a,b,f=.4){el.style.opacity=Math.min(p(t,a,a+f),1-p(t,b-f,b));}
+
+// S1 chips
+const TOK=["ETH · Ethereum","SOL · Solana","BTC","USDT · Tron","USDC · Base","USDC · Arbitrum","wNEAR","USDC · Solana","ETH · Base"];
+const chips=TOK.map((s,i)=>{const d=document.createElement('div');d.className='abs chip';d.textContent=s;$('chips').appendChild(d);return d;});
+// S2 nodes
+const ND=[["Wallet","holds SOL"],["Bridge","to another chain"],["DEX","swap to USDC"],["Gas token","buy ETH first"],["Merchant","maybe gets paid"]];
+const nodes=ND.map((n,i)=>{const d=document.createElement('div');d.className='abs node';d.innerHTML=n[0]+'<small>'+n[1]+'</small>';d.style.left=(160+i*337)+'px';d.style.top='455px';$('nodes').appendChild(d);return d;});
+const TAGS=[["+1–3% fees",1,345],["10+ min",2,625],["wrong network?",3,345],["no refund",4,625]];
+const tags=TAGS.map(([s,i,y])=>{const d=document.createElement('div');d.className='abs tag';d.textContent=s;d.style.left=(160+i*337+20)+'px';d.style.top=y+'px';$('nodes').appendChild(d);return d;});
+
+window.DURATION=56;
+window.seek=function(t){
+ $('grid').style.transform=`translate(${-(t*6)%80}px,${-(t*3)%80}px)`;
+ // S1 0-8
+ scene($('s1'),t,0,8.2,.3);
+ inUp($('s1a'),t,.3,.7); inUp($('s1b'),t,1.6,.7);
+ const sl=p(t,6.8,8); $('s1a').style.transform+=` translateX(${-sl*200}px)`; $('s1b').style.transform+=` translateX(${-sl*200}px)`;
+ chips.forEach((c,i)=>{const POS=[[1180,140],[1500,250],[1050,700],[1380,560],[1560,820],[1080,900],[1700,420],[1720,640],[1450,960]];const a=3.4+i*.28,k=p(t,a,a+1.6),x=POS[i][0]-120,y0=-120,y1=POS[i][1];
+   c.style.opacity=p(t,a,a+.2)*(1-p(t,7.4,8));
+   c.style.transform=`translate(${x}px,${y0+(y1-y0)*back(k)}px) rotate(${(i%2?1:-1)*(8+i*2)*k}deg)`;});
+ // S2 8-16
+ scene($('s2'),t,8,16.2,.4);
+ nodes.forEach((n,i)=>{const a=8.5+i*.7;const k=back(p(t,a,a+.5));n.style.opacity=p(t,a,a+.3);n.style.transform=`scale(${.6+.4*k})`;});
+ $('s2path').style.strokeDashoffset=-(t*30)%26;
+ tags.forEach((g,j)=>inUp(g,t,9.6+j*.7,.4,20));
+ const e=p(t,13,13.6); $('s2end').style.opacity=e; $('s2end').style.transform=`scale(${1.15-.15*eo(e)})`;
+ nodes[4].style.borderColor=t>13?'#FF5C6C':'#2a3550';
+ // S3 16-28
+ scene($('s3'),t,16,28.2,.4);
+ const lk=p(t,16.3,17.3); $('s3logo').style.opacity=lk; $('s3logo').style.transform=`scale(${.85+.15*back(lk)})`;
+ ['b1','b2','b3','b4'].forEach((b,i)=>inUp($(b),t,18+i*2.2,.6,50));
+ const dk=eio(p(t,18.6,25.4)); $('s3path').style.strokeDashoffset=1080*(1-dk);
+ $('s3dot').setAttribute('cx',420+1080*dk); $('s3dot').setAttribute('opacity',(t>18.6&&t<25.6)?1:0);
+ const pulse=p(t,25,26); $('b4').style.boxShadow=`0 0 ${60+120*Math.sin(pulse*Math.PI)}px rgba(0,236,151,${.25+.35*Math.sin(pulse*Math.PI)})`;
+ // S4 28-38
+ scene($('s4'),t,28,38.2,.4);
+ inUp($('s4t'),t,28.3,.6); ['c1','c2','c3'].forEach((c,i)=>{const a=29.2+i*2.6,k=p(t,a,a+.6);$(c).style.opacity=k;$(c).style.transform=`translateY(${(1-eo(k))*60}px) scale(${.92+.08*back(k)})`;});
+ // S8 38-46
+ scene($('s8'),t,38,46.2,.4);
+ ['p1','p2','p3','p4','p5'].forEach((b,i)=>inUp($(b),t,38.4+i*.5,.6,40));
+ const n26=Math.round(26*eo(p(t,38.5,40))); $('p1').querySelector('.big').textContent=n26;
+ const n10=Math.round(10*eo(p(t,39.5,41))); $('p3').querySelector('.big').textContent=n10;
+ // S9 46-56
+ scene($('s9'),t,46,56.01,.4);
+ const ok=p(t,46.3,47.3); $('s9logo').style.opacity=ok; $('s9logo').style.transform=`scale(${.85+.15*back(ok)})`;
+ inUp($('s9tag'),t,47.6,.7); inUp($('s9links'),t,49,.7); inUp($('s9foot'),t,50.2,.7);
+};
+window.seek(0);
+</script></body></html>
