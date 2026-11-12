@@ -120,6 +120,10 @@ docker-compose.yml   app + Caddy with automatic HTTPS (deploy/Caddyfile)
 | GET | `/api/merchant/overview` | invoices, revenue, handoffs |
 | POST | `/api/merchant/sessions/{sid}/reply` | `{text, release}` |
 
+## Sibling project
+
+My other NEAR HACKATHON entry is **[Agent Guard](https://github.com/Dengel88/near-agent-guard)**: a spending firewall for AI agents that holds or blocks risky payments before they leave the wallet. The two projects are independent and submitted separately; Agent Guard is the safety layer you would put in front of agents like the AI-Shtat Pay assistant.
+
 ## Status
 
 Work in progress during the hackathon. See [HANDOFF.md](HANDOFF.md) for the current state and next steps.
