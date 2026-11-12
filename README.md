@@ -6,6 +6,9 @@ Built at **NEAR HACKATHON** (Nov 1–14, 2026). Tracks: Real-World Money · Auto
 
 A small business puts a chat assistant on its website. A customer asks about services in their own language, decides to buy, and the assistant issues an invoice right in the chat. The customer pays with whatever they hold (ETH, SOL, BTC, USDT on Tron, NEAR, USDC on any L2). **NEAR Intents** (1Click API) routes the payment, and the merchant receives exactly the invoice amount in **USDC on their NEAR account**. When the AI isn't enough, a human manager takes over the same chat from the merchant desk.
 
+**Live demo:** <https://nearhackaton.vercel.app> (merchant desk at `/merchant`).
+**Mainnet proof:** a $1 coffee paid with 0.012 SOL settled as exactly 1.0 USDC to `wanderlust.near`: [EL7xz1A4…QESQfmdoQ](https://nearblocks.io/txns/EL7xz1A4j9vf2DxG2qDyfw49nh2J439pBu7QESQfmdoQ).
+
 | Chat: quote taken, waiting for deposit | Paid | Merchant desk |
 |---|---|---|
 | ![](docs/chat-deposit.png) | ![](docs/chat-paid.png) | ![](docs/merchant-desk.png) |
@@ -26,7 +29,7 @@ Open <http://localhost:8000>, click **"I want to buy one coffee"**, pick a token
 By default the app runs in **mock mode**: a rule-based assistant and a simulated 1Click API, so the full flow works offline with no API keys. Switch to the real thing with `.env` (see below).
 
 ```bash
-pytest -q          # 26 tests: domain rules, full payment flow, live-client request shapes
+pytest -q          # 33 tests: domain rules, full payment flow, live-client request shapes
 ```
 
 ## Live mode
@@ -126,6 +129,8 @@ My other NEAR HACKATHON entry is **[Agent Guard](https://github.com/Dengel88/nea
 
 ## Status
 
-Work in progress during the hackathon. See [HANDOFF.md](HANDOFF.md) for the current state and next steps.
+Submitted to NEAR HACKATHON 2026. All code in this repository was written during the hackathon, after the announcement; the first commit is from the hackathon window. There is no pre-hackathon baseline. Third-party code is limited to the open-source packages in `requirements.txt`.
 
-All code in this repository was written during NEAR HACKATHON, after the announcement.
+## License
+
+[MIT](LICENSE)
