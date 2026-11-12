@@ -111,9 +111,23 @@ class MockOneClick(OneClick):
     mode = "mock"
     SETTLE_SECONDS = 4.0
 
-    def __init__(self) -> None:
+    def __init__(self, kv: Any = None) -> None:
+        # kv: optional object with kv_get/kv_set (the Store). With it the simulator
+        # state lives in the database, so it survives serverless instance changes.
+        self._kv = kv
         self._quotes: dict[str, dict[str, Any]] = {}
         self._deposits: dict[str, float] = {}
+
+    def _get(self, kind: str, addr: str) -> Any:
+        if self._kv is not None:
+            return self._kv.kv_get(f"mock1click:{kind}:{addr}")
+        return (self._quotes if kind == "quote" else self._deposits).get(addr)
+
+    def _put(self, kind: str, addr: str, value: Any) -> None:
+        if self._kv is not None:
+            self._kv.kv_set(f"mock1click:{kind}:{addr}", value)
+        else:
+            (self._quotes if kind == "quote" else self._deposits)[addr] = value
 
     async def tokens(self) -> list[dict[str, Any]]:
         return [dict(t) for t in MOCK_TOKENS]
@@ -161,7 +175,7 @@ class MockOneClick(OneClick):
             "quote": quote,
         }
         if not request.get("dry"):
-            self._quotes[deposit] = resp
+            self._put("quote", deposit, resp)
         return resp
 
     @staticmethod
@@ -177,15 +191,16 @@ class MockOneClick(OneClick):
         return seed[:44]
 
     def simulate_deposit(self, deposit_address: str) -> None:
-        if deposit_address not in self._quotes:
+        if self._get("quote", deposit_address) is None:
             raise OneClickError("Deposit address not found", 404)
-        self._deposits.setdefault(deposit_address, time.time())
+        if self._get("deposit", deposit_address) is None:
+            self._put("deposit", deposit_address, time.time())
 
     async def status(self, deposit_address: str, deposit_memo: str | None = None) -> dict[str, Any]:
-        q = self._quotes.get(deposit_address)
+        q = self._get("quote", deposit_address)
         if q is None:
             raise OneClickError("1Click 404: Deposit address not found", 404)
-        seen = self._deposits.get(deposit_address)
+        seen = self._get("deposit", deposit_address)
         if seen is None:
             status = "PENDING_DEPOSIT"
         elif time.time() - seen < self.SETTLE_SECONDS:

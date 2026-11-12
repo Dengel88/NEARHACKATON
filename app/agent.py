@@ -99,6 +99,13 @@ Rules:
 """
 
 
+
+def _wire_call(c: dict[str, Any]) -> dict[str, Any]:
+    wire: dict[str, Any] = {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["arguments"])}}
+    if c.get("extra_content"):
+        wire["extra_content"] = c["extra_content"]
+    return wire
+
 class Agent:
     def __init__(self, settings: Settings, store: Store, llm: LLM):
         self.s = settings
@@ -171,8 +178,7 @@ class Agent:
                         "role": "assistant",
                         "content": r["content"] or None,
                         "tool_calls": [
-                            {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["arguments"])}}
-                            for c in r["meta"]["tool_calls"]
+                            _wire_call(c) for c in r["meta"]["tool_calls"]
                         ],
                     }
                 )

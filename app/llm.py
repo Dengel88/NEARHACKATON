@@ -63,7 +63,11 @@ class OpenAICompatible(LLM):
                 args = json.loads(raw) if isinstance(raw, str) else raw
             except json.JSONDecodeError:
                 args = {"_unparseable": raw}
-            calls.append({"id": tc.get("id") or uuid.uuid4().hex, "name": tc["function"]["name"], "arguments": args})
+            call = {"id": tc.get("id") or uuid.uuid4().hex, "name": tc["function"]["name"], "arguments": args}
+            if tc.get("extra_content"):
+                # Gemini 3 puts thought_signature here; it must be echoed back on the next turn
+                call["extra_content"] = tc["extra_content"]
+            calls.append(call)
         content = msg.get("content")
         if content:
             # reasoning models may leak <think> blocks into content

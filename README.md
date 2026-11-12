@@ -6,6 +6,9 @@ Built at **NEAR HACKATHON** (Nov 1–14, 2026). Tracks: Real-World Money · Auto
 
 A small business puts a chat assistant on its website. A customer asks about services in their own language, decides to buy, and the assistant issues an invoice right in the chat. The customer pays with whatever they hold (ETH, SOL, BTC, USDT on Tron, NEAR, USDC on any L2). **NEAR Intents** (1Click API) routes the payment, and the merchant receives exactly the invoice amount in **USDC on their NEAR account**. When the AI isn't enough, a human manager takes over the same chat from the merchant desk.
 
+**Live demo:** <https://nearhackaton.vercel.app> (merchant desk at `/merchant`).
+**Mainnet proof:** a $1 coffee paid with 0.012 SOL settled as exactly 1.0 USDC to `wanderlust.near`: [EL7xz1A4…QESQfmdoQ](https://nearblocks.io/txns/EL7xz1A4j9vf2DxG2qDyfw49nh2J439pBu7QESQfmdoQ).
+
 | Chat: quote taken, waiting for deposit | Paid | Merchant desk |
 |---|---|---|
 | ![](docs/chat-deposit.png) | ![](docs/chat-paid.png) | ![](docs/merchant-desk.png) |
@@ -26,7 +29,7 @@ Open <http://localhost:8000>, click **"I want to buy one coffee"**, pick a token
 By default the app runs in **mock mode**: a rule-based assistant and a simulated 1Click API, so the full flow works offline with no API keys. Switch to the real thing with `.env` (see below).
 
 ```bash
-pytest -q          # 25 tests: domain rules, full payment flow, live-client request shapes
+pytest -q          # 33 tests: domain rules, full payment flow, live-client request shapes
 ```
 
 ## Live mode
@@ -38,11 +41,27 @@ Copy `.env.example` to `.env` and set:
 | `ONECLICK_MODE=live` | Real NEAR Intents 1Click API (`https://1click.chaindefuser.com`, mainnet). |
 | `ONECLICK_API_KEY` | Optional partner key. Without it 1Click adds a 0.25% fee. |
 | `MERCHANT_NEAR_ACCOUNT` | The NEAR account that receives USDC. |
-| `LLM_PROVIDER=gemini` + `GEMINI_API_KEY` | Google Gemini through its OpenAI-compatible endpoint (`GEMINI_MODEL`, default `gemini-2.5-flash`). |
+| `LLM_PROVIDER=gemini` + `GEMINI_API_KEY` | Google Gemini through its OpenAI-compatible endpoint (`GEMINI_MODEL`, default `gemini-3.8-flash`). |
 | `LLM_PROVIDER=openai` | Any OpenAI-compatible endpoint with tool calling. |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | Defaults point to **NEAR AI Cloud** (private inference in TEEs). |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Optional: ping the manager in Telegram on handoff. |
 | `MERCHANT_DASHBOARD_TOKEN` | Optional: protect `/merchant` with `?token=…`. |
+
+Check the live 1Click wiring without moving funds:
+
+```bash
+python scripts/check_live.py   # /v0/tokens + dry EXACT_OUTPUT quotes for a $1 invoice
+```
+
+Verified on mainnet (2026-11-03): `USDC_ASSET_ID` matches USDC on NEAR, all 10 offered tokens exist, and a $1 invoice
+quotes at about $1.015 from NEAR, Ethereum, Base, Arbitrum and Solana. Tron USDT (min $100) and BTC (min ~0.064 BTC)
+have route minimums above small invoices; 1Click's error is shown to the customer as is.
+
+## Deploy
+
+Docker + Caddy (auto HTTPS) on any VPS: `cp .env.example .env`, set `DOMAIN` and keys, `docker compose up -d --build`.
+Vercel: import the repo and set `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` (free Turso libSQL) so all serverless
+instances share one database. Step by step: [DEPLOY.md](DEPLOY.md).
 
 ## How a payment works
 
@@ -83,10 +102,12 @@ app/llm.py           OpenAI-compatible provider (NEAR AI Cloud) + offline mock
 app/oneclick.py      1Click client (live) + simulator (mock)
 app/payments.py      invoice payment lifecycle
 app/domain.py        business rules
-app/store.py         SQLite
+app/store.py         SQLite: local file, or Turso/libSQL over HTTP for serverless
 web/index.html       customer chat widget with pay flow
 web/merchant.html    merchant desk: invoices, revenue, handoff queue, replies
 config.yaml          merchant, catalog, accepted tokens
+Dockerfile           production image (uvicorn, SQLite on /data volume)
+docker-compose.yml   app + Caddy with automatic HTTPS (deploy/Caddyfile)
 ```
 
 ## API
@@ -102,8 +123,14 @@ config.yaml          merchant, catalog, accepted tokens
 | GET | `/api/merchant/overview` | invoices, revenue, handoffs |
 | POST | `/api/merchant/sessions/{sid}/reply` | `{text, release}` |
 
+## Sibling project
+
+My other NEAR HACKATHON entry is **[Agent Guard](https://github.com/Dengel88/near-agent-guard)**: a spending firewall for AI agents that holds or blocks risky payments before they leave the wallet. The two projects are independent and submitted separately; Agent Guard is the safety layer you would put in front of agents like the AI-Shtat Pay assistant.
+
 ## Status
 
-Work in progress during the hackathon. See [HANDOFF.md](HANDOFF.md) for the current state and next steps.
+Submitted to NEAR HACKATHON 2026. All code in this repository was written during the hackathon, after the announcement; the first commit is from the hackathon window. There is no pre-hackathon baseline. Third-party code is limited to the open-source packages in `requirements.txt`.
 
-All code in this repository was written during NEAR HACKATHON, after the announcement.
+## License
+
+[MIT](LICENSE)

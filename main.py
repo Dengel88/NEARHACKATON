@@ -1,2 +1,4 @@
 """Entry point for `uvicorn main:app` and Vercel's Python runtime."""
-from app.main import app  # noqa: F401
+from app.boot import make_app
+
+app = make_app()

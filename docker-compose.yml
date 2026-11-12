@@ -1,0 +1,26 @@
+# One-box deploy: app + Caddy (automatic HTTPS via Let's Encrypt).
+# Usage on the server, from the repo root:
+#   cp .env.example .env   # fill keys, set DOMAIN
+#   docker compose up -d --build
+services:
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DB_PATH: /data/app.db   # on the volume, survives restarts
+    volumes:
+      - appdata:/data
+    restart: unless-stopped
+  caddy:
+    image: caddy:2.10
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env, e.g. pay.synndicate.ru}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+    depends_on: [app]
+    restart: unless-stopped
+volumes:
+  appdata:
+  caddydata:

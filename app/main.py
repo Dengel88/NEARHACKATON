@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import os
 import re
 import secrets
 from typing import Any
@@ -18,6 +20,7 @@ from .oneclick import LiveOneClick, MockOneClick, OneClick, OneClickError
 from .payments import Payments
 from .store import Store
 
+log = logging.getLogger("aishtat")
 WEB = ROOT / "web"
 SESSION_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
@@ -55,9 +58,16 @@ def create_app(
     store: Store | None = None,
 ) -> FastAPI:
     s = settings or get_settings()
-    store = store or Store(s.db_path)
+    storage_error = ""
+    if store is None:
+        try:
+            store = Store(s.db_path, s.turso_url, s.turso_token)
+        except Exception as exc:  # bad Turso URL/token must not take the whole site down
+            storage_error = f"{type(exc).__name__}: {exc}"[:300]
+            log.error("Shared database unavailable, falling back to local SQLite: %s", storage_error)
+            store = Store("/tmp/app.db" if os.getenv("VERCEL") else s.db_path)
     oneclick = oneclick or (
-        LiveOneClick(s.oneclick_base_url, s.oneclick_api_key) if s.oneclick_mode == "live" else MockOneClick()
+        LiveOneClick(s.oneclick_base_url, s.oneclick_api_key) if s.oneclick_mode == "live" else MockOneClick(store)
     )
     llm = llm or make_llm(s)
     agent = Agent(s, store, llm)
@@ -72,7 +82,7 @@ def create_app(
         return sid
 
     def merchant_auth(token: str = Query(default="")) -> None:
-        if s.dashboard_token and not secrets.compare_digest(token, s.dashboard_token):
+        if s.dashboard_token and not secrets.compare_digest(token.encode(), s.dashboard_token.encode()):
             raise HTTPException(401, "Bad dashboard token")
 
     @app.exception_handler(DomainError)
@@ -80,6 +90,15 @@ def create_app(
         from fastapi.responses import JSONResponse
 
         return JSONResponse({"detail": str(exc)}, status_code=422)
+
+    @app.exception_handler(Exception)
+    async def _unexpected(request, exc: Exception):  # type: ignore[no-untyped-def]
+        # A bare 500 hides the cause on serverless; show type + message (no secrets
+        # live in exception text here) and log the full traceback.
+        from fastapi.responses import JSONResponse
+
+        log.exception("Unhandled error on %s", request.url.path)
+        return JSONResponse({"detail": f"Internal error: {type(exc).__name__}: {exc}"[:500]}, status_code=500)
 
     @app.exception_handler(OneClickError)
     async def _oneclick(_, exc: OneClickError):  # type: ignore[no-untyped-def]
@@ -104,6 +123,8 @@ def create_app(
             "ok": True,
             "oneclick_mode": oneclick.mode,
             "llm": llm.name,
+            "storage": store.backend,
+            **({"storage_error": storage_error} if storage_error else {}),
             "merchant": s.merchant["name"],
             "settles_to": {"account": s.merchant_near_account, "asset": s.usdc_asset_id},
         }
@@ -152,6 +173,14 @@ def create_app(
     @app.get("/api/merchant/overview", dependencies=[Depends(merchant_auth)])
     async def overview() -> dict[str, Any]:
         invoices = store.list_invoices()
+        # Abandoned payments only expire when someone polls them; the customer
+        # tab is gone, so settle them here (one 1Click status call each).
+        for n, inv in enumerate(invoices):
+            if payments.is_stale(inv):
+                try:
+                    invoices[n] = await payments.refresh(inv["id"], force=True)
+                except Exception:  # never let one bad invoice break the desk
+                    log.exception("refresh failed for %s", inv.get("id"))
         paid = [i for i in invoices if i["status"] == "PAID"]
         return {
             "merchant": s.merchant,

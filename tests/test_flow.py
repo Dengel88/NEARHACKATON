@@ -83,3 +83,45 @@ def test_handoff_silences_ai_until_released(client):
 def test_bad_session_id(client):
     r = client.post("/api/chat", json={"session_id": "../x", "message": "hi"})
     assert r.status_code == 400
+
+
+def test_unexpected_errors_return_json_detail(settings):
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+    from app.store import Store
+
+    store = Store(":memory:")
+    store.list_sessions = lambda limit=50: (_ for _ in ()).throw(RuntimeError("boom"))  # type: ignore[assignment]
+    c = TestClient(create_app(settings=settings, store=store), raise_server_exceptions=False)
+    r = c.get("/api/merchant/overview")
+    assert r.status_code == 500 and "RuntimeError: boom" in r.json()["detail"]
+
+
+def test_dashboard_token_may_be_non_ascii(settings):
+    import dataclasses
+
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+    from app.store import Store
+
+    s = dataclasses.replace(settings, dashboard_token="придумай-пароль")
+    c = TestClient(create_app(settings=s, store=Store(":memory:")))
+    assert c.get("/api/merchant/overview", params={"token": "придумай-пароль"}).status_code == 200
+    assert c.get("/api/merchant/overview", params={"token": "wrong"}).status_code == 401
+    assert c.get("/api/merchant/overview", params={"token": "неверный"}).status_code == 401
+
+
+def test_desk_expires_abandoned_payments(client):
+    out = _chat(client, "I want to buy 1 coffee", sid="abandoned-session")
+    inv = out["messages"][-1]["invoices"][0]
+    tokens = client.get("/api/tokens").json()
+    sol = next(t for t in tokens if t["symbol"] == "SOL")
+    client.post(f"/api/invoices/{inv['id']}/pay", json={"origin_asset": sol["assetId"], "refund_to": "So1anaRefund1"})
+    store = client.app.state.store
+    stored = store.get_invoice(inv["id"])
+    stored["payment"]["deadline"] = "2020-01-01T00:00:00Z"
+    store.save_invoice(stored)
+    ov = client.get("/api/merchant/overview").json()
+    assert next(i for i in ov["invoices"] if i["id"] == inv["id"])["status"] == "EXPIRED"
